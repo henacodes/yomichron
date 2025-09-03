@@ -10,3 +10,13 @@ export interface RawWindowData {
   height: string;
   idle_sec: string;
 }
+
+export interface Heartbeat {
+  time: number; //
+  entity: string | null;
+  app_name: string;
+  process_id: number;
+  project: string | null;
+  idle_sec: number;
+  context: string | null;
+}

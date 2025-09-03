@@ -3,7 +3,8 @@ import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/core";
 import { db } from "./db/db";
 import "./App.css";
-import { RawWindowData } from "./types/heartbeat";
+import { RawWindowData } from "@/heartbeat/interface";
+import { useHeartbeat } from "./hooks/useHeartbeat";
 
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
@@ -11,6 +12,8 @@ function App() {
 
   const [currentActiveWindowData, setCurrentActiveWindowData] =
     useState<RawWindowData | null>(null);
+
+  useHeartbeat();
 
   async function greet() {
     // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/

@@ -1,11 +1,13 @@
-
-use migrations::get_migrations;
 mod migrations;
+mod commands;
 
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
+
+
+use commands::window_metadata_commands::get_current_active_window;
+use migrations::get_migrations;
+
+
+
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -17,7 +19,7 @@ pub fn run() {
                 .build(),
             )
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![get_current_active_window])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

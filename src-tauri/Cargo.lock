@@ -5054,6 +5054,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "user-idle-time"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "657ffe01f35a35308c81110e56aedc4bd83788e5c4ac54679c85b0e0b47e49ca"
+dependencies = [
+ "anyhow",
+ "windows-sys 0.59.0",
+ "x11",
+]
+
+[[package]]
 name = "utf-8"
 version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5963,6 +5974,7 @@ dependencies = [
  "tauri-build",
  "tauri-plugin-opener",
  "tauri-plugin-sql",
+ "user-idle-time",
 ]
 
 [[package]]

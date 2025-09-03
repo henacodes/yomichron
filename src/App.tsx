@@ -1,12 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/core";
 import { db } from "./db/db";
 import "./App.css";
+import { RawWindowData } from "./types/heartbeat";
 
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
   const [name, setName] = useState("");
+
+  const [currentActiveWindowData, setCurrentActiveWindowData] =
+    useState<RawWindowData | null>(null);
 
   async function greet() {
     // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
@@ -29,6 +33,19 @@ function App() {
 
     console.log(result);
   }
+
+  async function fetchActiveWindow() {
+    let res = await invoke("get_current_active_window");
+    let raw = res as RawWindowData;
+    setCurrentActiveWindowData(raw);
+  }
+
+  useEffect(() => {
+    fetchActiveWindow();
+    const intervalId = setInterval(fetchActiveWindow, 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
 
   return (
     <main className="container">

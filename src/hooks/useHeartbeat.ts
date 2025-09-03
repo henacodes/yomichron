@@ -2,7 +2,11 @@ import { useEffect, useRef } from "react";
 import { handleWindowMetadata } from "@/heartbeat/emitter";
 import { getCurrentActiveWindow } from "@/heartbeat/utils";
 import { RawWindowData } from "@/heartbeat/interface";
-import { HEARTBEAT_TIMEOUT, IDLE_THRESHOLD } from "@/constants";
+import {
+  ACTIVE_WINDOW_PING_SECONDS,
+  HEARTBEAT_TIMEOUT,
+  IDLE_THRESHOLD,
+} from "@/constants";
 
 export function useHeartbeat() {
   const lastHeartbeatRef = useRef<RawWindowData | null>(null);
@@ -10,7 +14,9 @@ export function useHeartbeat() {
   useEffect(() => {
     const interval = setInterval(async () => {
       const metadata = await getCurrentActiveWindow();
-
+      if (metadata == null) {
+        return;
+      }
       const now = Date.now();
       const last = lastHeartbeatRef.current;
 
@@ -34,7 +40,7 @@ export function useHeartbeat() {
         lastHeartbeatRef.current = metadata;
         lastTimestampRef.current = now;
       }
-    }, 1000);
+    }, ACTIVE_WINDOW_PING_SECONDS);
 
     return () => clearInterval(interval);
   }, []);

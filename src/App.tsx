@@ -3,86 +3,86 @@ import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/core";
 import { db } from "./db/db";
 import "./App.css";
-import { RawWindowData } from "@/heartbeat/interface";
+import { Heartbeat, RawWindowData } from "@/heartbeat/interface";
 import { useHeartbeat } from "./hooks/useHeartbeat";
+import { getHeartbeats } from "./db/services/heartbeat";
+
+interface FileProjectSummary {
+  entity: string | null;
+  project: string | null;
+  count: number;
+  totalIdle: number;
+  lastTime: number;
+}
 
 function App() {
   const [greetMsg, setGreetMsg] = useState("");
   const [name, setName] = useState("");
 
-  const [currentActiveWindowData, setCurrentActiveWindowData] =
-    useState<RawWindowData | null>(null);
+  const [summary, setSummary] = useState<FileProjectSummary[]>([]);
 
   useHeartbeat();
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
+  async function fetchSummary() {
+    try {
+      const heartbeats = (await getHeartbeats()) as Heartbeat[];
 
-    const result = await db.execute(
-      `INSERT INTO heartbeat (
-        time, entity, app_name, process_id, project, idle_sec, context
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [
-        1756615067.713, // time (number)
-        "ExcerptCard.tsx", // entity (string or null)
-        "VSCodium", // app_name (string)
-        2593, // process_id (number)
-        "bereans", // project (string or null)
-        120, // idle (number of seconds, e.g. 120 for 2 minutes)
-        "some string", // context (string or null)
-      ]
-    );
+      const grouped: Record<string, FileProjectSummary> = {};
 
-    console.log(result);
+      heartbeats.forEach((hb) => {
+        const key = `${hb.entity || "null"}__${hb.project || "null"}`;
+        if (!grouped[key]) {
+          grouped[key] = {
+            entity: hb.entity,
+            project: hb.project,
+            count: 0,
+            totalIdle: 0,
+            lastTime: hb.time,
+          };
+        }
+
+        grouped[key].count += 1;
+        grouped[key].totalIdle += hb.idle_sec;
+
+        // Update lastTime if this heartbeat is newer
+        if (hb.time > grouped[key].lastTime) {
+          grouped[key].lastTime = hb.time;
+        }
+      });
+
+      setSummary(Object.values(grouped));
+    } catch (err) {
+      console.error("Failed to fetch heartbeats:", err);
+    }
   }
 
-  async function fetchActiveWindow() {
-    let res = await invoke("get_current_active_window");
-    let raw = res as RawWindowData;
-    setCurrentActiveWindowData(raw);
-  }
-
-  useEffect(() => {
-    fetchActiveWindow();
-    const intervalId = setInterval(fetchActiveWindow, 1000);
-
-    return () => clearInterval(intervalId);
-  }, []);
-
+  fetchSummary();
   return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
-
-      <div className="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-    </main>
+    <div>
+      <h2>File-Project Summary</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>File (Entity)</th>
+            <th>Project</th>
+            <th>Count</th>
+            <th>Total Idle (s)</th>
+            <th>Last Activity</th>
+          </tr>
+        </thead>
+        <tbody>
+          {summary.map((s) => (
+            <tr key={`${s.entity}-${s.project}`}>
+              <td>{s.entity}</td>
+              <td>{s.project}</td>
+              <td>{s.count}</td>
+              <td>{s.totalIdle}</td>
+              <td>{new Date(s.lastTime * 1000).toLocaleString()}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 

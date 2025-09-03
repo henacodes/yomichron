@@ -1,8 +1,8 @@
 import { Heartbeat, RawWindowData } from "@/heartbeat/interface";
-import { HeartbeatPlugin } from "./plugin";
+import { ProgramHeartbeatPlugin } from "./plugin";
 import { VSCodiumPlugin } from "@plugins/vscode";
 
-export const plugins: HeartbeatPlugin[] = [
+export const plugins: ProgramHeartbeatPlugin[] = [
   new VSCodiumPlugin(),
   // Add more plugins here!
 ];

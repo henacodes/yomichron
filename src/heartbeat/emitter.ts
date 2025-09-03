@@ -1,6 +1,5 @@
 import { plugins } from "@plugins/index";
 import { RawWindowData, Heartbeat } from "@/heartbeat/interface";
-import { HeartbeatPlugin } from "@/plugins/plugin";
 
 export function handleWindowMetadata(metadata: RawWindowData) {
   for (const plugin of plugins) {
@@ -14,6 +13,7 @@ export function handleWindowMetadata(metadata: RawWindowData) {
         process_id: Number(metadata.process_id),
         idle_sec: Number(metadata.idle_sec),
       };
+      console.log(heartbeat);
 
       console.log("SAVVEEEEEEEEEEEEEEEEEEE");
       //saveHeartbeatToDatabase(heartbeat);

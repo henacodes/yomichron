@@ -1,11 +1,16 @@
 import { Heartbeat, RawWindowData } from "@/heartbeat/interface";
 
-export interface HeartbeatPlugin {
+export abstract class ProgramHeartbeatPlugin {
   /** Return true if this plugin should handle the given app/window. */
-  matches(metadata: RawWindowData): boolean;
+  abstract matches(metadata: RawWindowData): boolean;
 
   /** Parse the metadata and return normalized heartbeat fields. */
-  parse(
+  abstract parse(
     metadata: RawWindowData
   ): Pick<Heartbeat, "context" | "entity" | "project">;
+  /* Parse the metadata title  */
+  protected abstract parseTitle(title: string): {
+    entity: string | null;
+    project: string | null;
+  };
 }

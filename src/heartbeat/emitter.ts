@@ -16,7 +16,6 @@ export function handleWindowMetadata(metadata: RawWindowData) {
       };
       console.log(heartbeat);
 
-      console.log("SAVVEEEEEEEEEEEEEEEEEEE");
       saveHeartbeat(heartbeat);
       return;
     }

@@ -21,3 +21,8 @@ export interface Heartbeat {
   idle_sec: number;
   context: string | null;
 }
+
+export type ParsedHeartbeatFields = Pick<
+  Heartbeat,
+  "context" | "entity" | "project"
+>;
